@@ -1,0 +1,145 @@
+<!-- File: /docs/index.html -->
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Draw & Dash（コインひろい）</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg-pattern" aria-hidden="true"></div>
+
+  <main class="app">
+    <section id="screen-title" class="screen">
+      <h1>Draw & Dash</h1>
+      <p class="subtitle">じぶんで かいたキャラで コインを あつめよう！</p>
+      <div class="card preview-card">
+        <div class="preview-wrap">
+          <img id="title-preview" alt="キャラプレビュー" />
+        </div>
+        <p id="title-preview-label">まだキャラがありません</p>
+      </div>
+      <div class="actions">
+        <button id="btn-play" class="btn btn-primary">あそぶ</button>
+        <button id="btn-go-draw" class="btn">おえかき</button>
+        <button id="btn-go-settings" class="btn">せってい</button>
+      </div>
+    </section>
+
+    <section id="screen-draw" class="screen hidden">
+      <h2>おえかき</h2>
+      <p id="draw-guide" class="subtitle">キャラを かいて「できた！」を おしてね</p>
+
+      <div class="toolbar">
+        <div class="tool-group">
+          <span>ふとさ</span>
+          <button class="btn small size-btn active" data-size="4">S</button>
+          <button class="btn small size-btn" data-size="8">M</button>
+          <button class="btn small size-btn" data-size="14">L</button>
+        </div>
+        <div class="tool-group">
+          <span>いろ</span>
+          <button class="color-btn active" data-color="#2b2d42" style="--c:#2b2d42"></button>
+          <button class="color-btn" data-color="#ef476f" style="--c:#ef476f"></button>
+          <button class="color-btn" data-color="#ff9f1c" style="--c:#ff9f1c"></button>
+          <button class="color-btn" data-color="#06d6a0" style="--c:#06d6a0"></button>
+          <button class="color-btn" data-color="#118ab2" style="--c:#118ab2"></button>
+          <button class="color-btn" data-color="#8338ec" style="--c:#8338ec"></button>
+        </div>
+        <div class="tool-group">
+          <button id="btn-eraser" class="btn small">けしゴム OFF</button>
+        </div>
+      </div>
+
+      <div class="draw-canvas-wrap">
+        <canvas id="draw-canvas" width="640" height="640" aria-label="おえかきキャンバス"></canvas>
+      </div>
+
+      <div class="actions">
+        <button id="btn-clear-draw" class="btn">けす（全消し）</button>
+        <button id="btn-undo-draw" class="btn">ひとつもどる</button>
+        <button id="btn-save-draw" class="btn btn-primary">できた！（保存して使う）</button>
+      </div>
+      <div class="actions">
+        <button id="btn-back-title-from-draw" class="btn ghost">タイトルへ</button>
+      </div>
+    </section>
+
+    <section id="screen-ready" class="screen hidden">
+      <h2>スタートじゅんび</h2>
+      <div class="card">
+        <p>このキャラで あそぶよ！</p>
+        <div class="preview-wrap large">
+          <img id="ready-preview" alt="ゲーム用キャラ" />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btn-start-game" class="btn btn-primary">スタート</button>
+        <button id="btn-back-draw-from-ready" class="btn">おえかきに もどる</button>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen hidden">
+      <div class="hud">
+        <div class="hud-item">スコア: <span id="hud-score">0</span></div>
+        <div class="hud-item">のこり: <span id="hud-time">90.0</span>s</div>
+      </div>
+      <div class="game-wrap">
+        <canvas id="game-canvas" width="960" height="540" aria-label="ゲーム画面"></canvas>
+      </div>
+      <div class="controls" id="controls">
+        <button id="ctrl-left" class="ctrl-btn" aria-label="左">←</button>
+        <button id="ctrl-right" class="ctrl-btn" aria-label="右">→</button>
+        <button id="ctrl-jump" class="ctrl-btn jump" aria-label="ジャンプ">⤴</button>
+      </div>
+      <p class="subtitle">ミス 3回で おしまい</p>
+    </section>
+
+    <section id="screen-result" class="screen hidden">
+      <h2>けっか</h2>
+      <div class="card result-card" id="result-card">
+        <p>スコア: <strong id="result-score">0</strong></p>
+        <p>コイン: <strong id="result-coins">0</strong> まい</p>
+        <p>ベスト: <strong id="result-best">0</strong></p>
+        <p id="result-best-badge" class="best-badge hidden">NEW BEST!</p>
+      </div>
+      <div class="actions">
+        <button id="btn-retry" class="btn btn-primary">もういっかい</button>
+        <button id="btn-result-draw" class="btn">おえかきにもどる</button>
+        <button id="btn-result-title" class="btn ghost">タイトルへ</button>
+      </div>
+    </section>
+
+    <section id="screen-settings" class="screen hidden">
+      <h2>せってい</h2>
+      <div class="card settings-grid">
+        <label><span>BGM</span><input id="set-bgm" type="checkbox" /></label>
+        <label><span>こうかおん</span><input id="set-se" type="checkbox" /></label>
+        <label>
+          <span>なんいど</span>
+          <select id="set-difficulty">
+            <option value="easy">Easy</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+          </select>
+        </label>
+        <label>
+          <span>プレイじかん</span>
+          <select id="set-duration">
+            <option value="60">60s</option>
+            <option value="90">90s</option>
+            <option value="120">120s</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="btn-settings-back" class="btn btn-primary">もどる</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
