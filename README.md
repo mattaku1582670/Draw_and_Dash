@@ -9,7 +9,7 @@
 - `docs/index.html`
 - `docs/styles.css`
 - `docs/app.js`
-- `docs/assets/`（今回は未使用）
+- `docs/assets/`
 
 ## ローカル起動
 
