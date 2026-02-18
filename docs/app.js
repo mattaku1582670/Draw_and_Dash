@@ -9,7 +9,7 @@
       bgm: true,
       se: true,
       difficulty: "normal",
-      duration: 90
+      duration: 90,
     },
     getDrawing() {
       try {
@@ -31,8 +31,12 @@
         return {
           bgm: !!parsed.bgm,
           se: !!parsed.se,
-          difficulty: ["easy", "normal", "hard"].includes(parsed.difficulty) ? parsed.difficulty : "normal",
-          duration: [60, 90, 120].includes(Number(parsed.duration)) ? Number(parsed.duration) : 90
+          difficulty: ["easy", "normal", "hard"].includes(parsed.difficulty)
+            ? parsed.difficulty
+            : "normal",
+          duration: [60, 90, 120].includes(Number(parsed.duration))
+            ? Number(parsed.duration)
+            : 90,
         };
       } catch {
         return { ...this.defaults };
@@ -55,7 +59,7 @@
       try {
         localStorage.setItem(`bestScore_${difficulty}`, String(score));
       } catch {}
-    }
+    },
   };
 
   const AudioEngine = {
@@ -64,7 +68,8 @@
     bgmOn: true,
     seOn: true,
     ensureContext() {
-      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!this.ctx)
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
       if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
     },
     unlock() {
@@ -133,12 +138,15 @@
       const [o1, o2, gain] = this.bgmNodes;
       try {
         gain.gain.setValueAtTime(gain.gain.value, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          this.ctx.currentTime + 0.1,
+        );
         o1.stop(this.ctx.currentTime + 0.12);
         o2.stop(this.ctx.currentTime + 0.12);
       } catch {}
       this.bgmNodes = [];
-    }
+    },
   };
 
   const DrawPad = {
@@ -156,7 +164,10 @@
     maxUndo: 20,
     init(canvas) {
       this.canvas = canvas;
-      this.ctx = this.canvas.getContext("2d", { alpha: true, desynchronized: true });
+      this.ctx = this.canvas.getContext("2d", {
+        alpha: true,
+        desynchronized: true,
+      });
       this.resize();
       this.clear(false);
       this.installEvents();
@@ -191,25 +202,33 @@
       const c = this.canvas;
       c.style.touchAction = "none";
 
-      c.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        c.setPointerCapture(e.pointerId);
-        this.pointerId = e.pointerId;
-        this.drawing = true;
-        const p = this.getPos(e);
-        this.lastX = p.x;
-        this.lastY = p.y;
-        this.strokePoint(p.x, p.y, true);
-      }, { passive: false });
+      c.addEventListener(
+        "pointerdown",
+        (e) => {
+          e.preventDefault();
+          c.setPointerCapture(e.pointerId);
+          this.pointerId = e.pointerId;
+          this.drawing = true;
+          const p = this.getPos(e);
+          this.lastX = p.x;
+          this.lastY = p.y;
+          this.strokePoint(p.x, p.y, true);
+        },
+        { passive: false },
+      );
 
-      c.addEventListener("pointermove", (e) => {
-        if (!this.drawing || e.pointerId !== this.pointerId) return;
-        e.preventDefault();
-        const p = this.getPos(e);
-        this.strokeLine(this.lastX, this.lastY, p.x, p.y);
-        this.lastX = p.x;
-        this.lastY = p.y;
-      }, { passive: false });
+      c.addEventListener(
+        "pointermove",
+        (e) => {
+          if (!this.drawing || e.pointerId !== this.pointerId) return;
+          e.preventDefault();
+          const p = this.getPos(e);
+          this.strokeLine(this.lastX, this.lastY, p.x, p.y);
+          this.lastX = p.x;
+          this.lastY = p.y;
+        },
+        { passive: false },
+      );
 
       const end = (e) => {
         if (e.pointerId !== this.pointerId) return;
@@ -220,29 +239,35 @@
       };
       c.addEventListener("pointerup", end, { passive: false });
       c.addEventListener("pointercancel", end, { passive: false });
-      c.addEventListener("pointerleave", () => {
-        if (this.drawing) this.pushSnapshot();
-        this.drawing = false;
-        this.pointerId = null;
-      }, { passive: false });
+      c.addEventListener(
+        "pointerleave",
+        () => {
+          if (this.drawing) this.pushSnapshot();
+          this.drawing = false;
+          this.pointerId = null;
+        },
+        { passive: false },
+      );
     },
     getPos(e) {
       const rect = this.canvas.getBoundingClientRect();
       return {
         x: ((e.clientX - rect.left) / rect.width) * this.canvas.width,
-        y: ((e.clientY - rect.top) / rect.height) * this.canvas.height
+        y: ((e.clientY - rect.top) / rect.height) * this.canvas.height,
       };
     },
     strokePoint(x, y, dot = false) {
       const ctx = this.ctx;
       ctx.save();
-      ctx.globalCompositeOperation = this.eraser ? "destination-out" : "source-over";
+      ctx.globalCompositeOperation = this.eraser
+        ? "destination-out"
+        : "source-over";
       ctx.strokeStyle = this.color;
       ctx.fillStyle = this.color;
       ctx.lineWidth = this.brushSize * this.dpr;
       if (dot) {
         ctx.beginPath();
-        ctx.arc(x, y, (ctx.lineWidth * 0.5), 0, Math.PI * 2);
+        ctx.arc(x, y, ctx.lineWidth * 0.5, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
@@ -250,7 +275,9 @@
     strokeLine(x1, y1, x2, y2) {
       const ctx = this.ctx;
       ctx.save();
-      ctx.globalCompositeOperation = this.eraser ? "destination-out" : "source-over";
+      ctx.globalCompositeOperation = this.eraser
+        ? "destination-out"
+        : "source-over";
       ctx.strokeStyle = this.color;
       ctx.lineWidth = this.brushSize * this.dpr;
       ctx.beginPath();
@@ -261,7 +288,12 @@
     },
     pushSnapshot() {
       try {
-        const snap = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const snap = this.ctx.getImageData(
+          0,
+          0,
+          this.canvas.width,
+          this.canvas.height,
+        );
         this.history.push(snap);
         const max = this.maxUndo + 1;
         if (this.history.length > max) this.history.shift();
@@ -292,7 +324,12 @@
       this.eraser = !!on;
     },
     isBlank() {
-      const img = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+      const img = this.ctx.getImageData(
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height,
+      ).data;
       for (let i = 3; i < img.length; i += 4) {
         if (img[i] > 8) return false;
       }
@@ -303,7 +340,10 @@
       const src = this.canvas;
       const ctx = this.ctx;
       const data = ctx.getImageData(0, 0, src.width, src.height).data;
-      let minX = src.width, minY = src.height, maxX = -1, maxY = -1;
+      let minX = src.width,
+        minY = src.height,
+        maxX = -1,
+        maxY = -1;
       for (let y = 0; y < src.height; y++) {
         for (let x = 0; x < src.width; x++) {
           const a = data[(y * src.width + x) * 4 + 3];
@@ -348,7 +388,7 @@
         this.pushSnapshot();
       };
       img.src = pngDataUrl;
-    }
+    },
   };
 
   const Game = {
@@ -383,6 +423,13 @@
     groundOffset: 0,
     groundPattern: null,
 
+    coinSprite: null,
+    coinSpriteReady: false,
+    coinFrameCount: 8,
+    coinFrameW: 32,
+    coinFrameH: 32,
+    coinFramesVertical: false,
+
     input: { left: false, right: false, jumpQueued: false },
 
     onTick: null,
@@ -390,10 +437,14 @@
 
     init(canvas, onTick, onFinish) {
       this.canvas = canvas;
-      this.ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
+      this.ctx = canvas.getContext("2d", {
+        alpha: false,
+        desynchronized: true,
+      });
       this.onTick = onTick;
       this.onFinish = onFinish;
       this.resize();
+      this.loadCoinSprite();
       window.addEventListener("resize", () => this.resize());
     },
     resize() {
@@ -405,6 +456,34 @@
       this.canvas.width = w;
       this.canvas.height = h;
       this.makeGroundPattern();
+    },
+    loadCoinSprite() {
+      const img = new Image();
+      img.onload = () => {
+        this.coinSprite = img;
+        this.coinSpriteReady = true;
+        if (img.width % this.coinFrameCount === 0) {
+          this.coinFramesVertical = false;
+          this.coinFrameW = Math.floor(img.width / this.coinFrameCount);
+          this.coinFrameH = img.height;
+        } else if (img.height % this.coinFrameCount === 0) {
+          this.coinFramesVertical = true;
+          this.coinFrameW = img.width;
+          this.coinFrameH = Math.floor(img.height / this.coinFrameCount);
+        } else {
+          this.coinFramesVertical = false;
+          this.coinFrameW = Math.max(
+            1,
+            Math.floor(img.width / this.coinFrameCount),
+          );
+          this.coinFrameH = img.height;
+        }
+      };
+      img.onerror = () => {
+        this.coinSprite = null;
+        this.coinSpriteReady = false;
+      };
+      img.src = "./assets/coin_spin_8f_48.png";
     },
     makeGroundPattern() {
       const p = document.createElement("canvas");
@@ -454,7 +533,10 @@
       this.coins = [];
       this.obstacles = [];
       this.nextCoinIn = this.rand(this.coinInterval[0], this.coinInterval[1]);
-      this.nextObstacleIn = this.rand(this.obstacleInterval[0], this.obstacleInterval[1]);
+      this.nextObstacleIn = this.rand(
+        this.obstacleInterval[0],
+        this.obstacleInterval[1],
+      );
       this.starsOffset = 0;
       this.hillsOffset = 0;
       this.groundOffset = 0;
@@ -467,7 +549,7 @@
         h: 62,
         vy: 0,
         onGround: true,
-        invUntil: 0
+        invUntil: 0,
       };
       this.player.y = this.groundY() - this.player.h;
       this.loadPlayerImage(playerPng);
@@ -485,7 +567,9 @@
       this.playerImg = null;
       if (!dataUrl) return;
       const img = new Image();
-      img.onload = () => { this.playerImg = img; };
+      img.onload = () => {
+        this.playerImg = img;
+      };
       img.src = dataUrl;
     },
     setInput(name, on) {
@@ -502,7 +586,8 @@
 
       this.frameBudget.push(dt);
       if (this.frameBudget.length > 45) this.frameBudget.shift();
-      const avg = this.frameBudget.reduce((a, b) => a + b, 0) / this.frameBudget.length;
+      const avg =
+        this.frameBudget.reduce((a, b) => a + b, 0) / this.frameBudget.length;
       if (avg > 0.038) this.fixed30fps = true;
 
       const step = this.fixed30fps ? 1 / 30 : dt;
@@ -520,7 +605,8 @@
       this.coins.push({
         x: this.canvas.width + 30 * this.dpr,
         y,
-        r: 15 * this.dpr
+        r: 15 * this.dpr,
+        animSeed: Math.random() * 10, // 個体差（同時に出ても同じコマにならない）
       });
     },
     spawnObstacle() {
@@ -533,7 +619,7 @@
           x: this.canvas.width + size,
           y: gy - size,
           w: size,
-          h: size
+          h: size,
         });
       } else {
         const w = 42 * this.dpr;
@@ -543,7 +629,7 @@
           x: this.canvas.width + w,
           y: gy - h,
           w,
-          h
+          h,
         });
       }
     },
@@ -552,11 +638,13 @@
         x: this.player.x + 7 * this.dpr,
         y: this.player.y + 5 * this.dpr,
         w: this.player.w - 14 * this.dpr,
-        h: this.player.h - 8 * this.dpr
+        h: this.player.h - 8 * this.dpr,
       };
     },
     intersects(a, b) {
-      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      return (
+        a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+      );
     },
     circleRectHit(c, r) {
       const cx = Math.max(r.x, Math.min(c.x, r.x + r.w));
@@ -581,7 +669,7 @@
         this.onFinish({
           score: this.score,
           coins: this.coinsCollected,
-          difficulty: this.settings.difficulty
+          difficulty: this.settings.difficulty,
         });
       }
     },
@@ -631,7 +719,10 @@
       this.nextObstacleIn -= dt;
       if (this.nextObstacleIn <= 0) {
         this.spawnObstacle();
-        this.nextObstacleIn = this.rand(this.obstacleInterval[0], this.obstacleInterval[1]);
+        this.nextObstacleIn = this.rand(
+          this.obstacleInterval[0],
+          this.obstacleInterval[1],
+        );
       }
 
       for (const c of this.coins) c.x -= speed * dt;
@@ -665,7 +756,7 @@
       if (this.onTick) {
         this.onTick({
           score: this.score,
-          remaining: this.remaining
+          remaining: this.remaining,
         });
       }
     },
@@ -705,10 +796,52 @@
       ctx.fillRect(0, gy, w + 160 * this.dpr, h - gy);
       ctx.restore();
     },
-    drawCoins() {
+    drawCoins(now) {
       const ctx = this.ctx;
+
+      // スプライトが使えるならスプライト描画
+      if (this.coinSpriteReady && this.coinSprite) {
+        const img = this.coinSprite;
+
+        // 1周の速さ（秒）: 小さいほど速い
+        const cycleSec = 0.6;
+
+        for (const c of this.coins) {
+          // 個体差付きでフレーム決定
+          const t = (now + c.animSeed) / cycleSec;
+          const frame = Math.floor((t % 1) * this.coinFrameCount);
+
+          // スプライト切り出し位置
+          const sx = this.coinFramesVertical ? 0 : frame * this.coinFrameW;
+          const sy = this.coinFramesVertical ? frame * this.coinFrameH : 0;
+          const sw = this.coinFrameW;
+          const sh = this.coinFrameH;
+
+          // 描画サイズ（r基準で良い感じに）
+          const size = Math.max(24 * this.dpr, c.r * 1.5); // 2.0-2.8あたり
+          const dx = c.x - size / 2;
+          const dy = c.y - size / 2;
+
+          // ほんのりグロー（任意：効く）
+          ctx.save();
+          ctx.shadowBlur = 10 * this.dpr;
+          ctx.shadowColor = "rgba(255, 200, 40, 0.55)";
+          ctx.drawImage(img, sx, sy, sw, sh, dx, dy, size, size);
+          ctx.restore();
+        }
+        return;
+      }
+
+      // フォールバック（現行の円コイン）
       for (const c of this.coins) {
-        const grad = ctx.createRadialGradient(c.x - c.r * 0.3, c.y - c.r * 0.3, c.r * 0.2, c.x, c.y, c.r);
+        const grad = ctx.createRadialGradient(
+          c.x - c.r * 0.3,
+          c.y - c.r * 0.3,
+          c.r * 0.2,
+          c.x,
+          c.y,
+          c.r,
+        );
         grad.addColorStop(0, "#fff7b1");
         grad.addColorStop(1, "#ffb700");
         ctx.fillStyle = grad;
@@ -768,10 +901,10 @@
     },
     draw(now) {
       this.drawBackground();
-      this.drawCoins();
+      this.drawCoins(now);
       this.drawObstacles();
       this.drawPlayer(now);
-    }
+    },
   };
 
   const UI = {
@@ -784,7 +917,12 @@
       this.bindGlobal();
       this.bindScreenButtons();
       DrawPad.init(this.els.drawCanvas);
-      Game.init(this.els.gameCanvas, (tick) => this.updateHud(tick), (result) => this.showResult(result));
+      Game.init(
+        this.els.gameCanvas,
+        (tick) => this.updateHud(tick),
+        (result) => this.showResult(result),
+      );
+      // ctx.imageSmoothingEnabled = false; //ドット絵感を出すなら
       this.applySettingsToForm();
       this.refreshPreviews();
       AudioEngine.setConfig(this.settings);
@@ -792,7 +930,8 @@
       const drawing = Storage.getDrawing();
       if (!drawing) {
         this.openScreen("draw");
-        this.els.drawGuide.textContent = "はじめて あそぶには、まずキャラを かいてね！";
+        this.els.drawGuide.textContent =
+          "はじめて あそぶには、まずキャラを かいてね！";
       } else {
         this.openScreen("title");
       }
@@ -804,7 +943,7 @@
         ready: document.getElementById("screen-ready"),
         game: document.getElementById("screen-game"),
         result: document.getElementById("screen-result"),
-        settings: document.getElementById("screen-settings")
+        settings: document.getElementById("screen-settings"),
       };
 
       this.els = {
@@ -824,7 +963,7 @@
         setBgm: document.getElementById("set-bgm"),
         setSe: document.getElementById("set-se"),
         setDifficulty: document.getElementById("set-difficulty"),
-        setDuration: document.getElementById("set-duration")
+        setDuration: document.getElementById("set-duration"),
       };
     },
     bindGlobal() {
@@ -832,7 +971,11 @@
       window.addEventListener("pointerdown", unlock, { once: true });
 
       const stopDefaultTouch = (e) => e.preventDefault();
-      [this.els.drawCanvas, this.els.gameCanvas, document.getElementById("controls")].forEach((el) => {
+      [
+        this.els.drawCanvas,
+        this.els.gameCanvas,
+        document.getElementById("controls"),
+      ].forEach((el) => {
         el.addEventListener("touchstart", stopDefaultTouch, { passive: false });
         el.addEventListener("touchmove", stopDefaultTouch, { passive: false });
       });
@@ -852,40 +995,58 @@
         this.openScreen("draw");
       });
 
-      document.getElementById("btn-go-settings").addEventListener("click", () => {
-        this.openScreen("settings");
-      });
+      document
+        .getElementById("btn-go-settings")
+        .addEventListener("click", () => {
+          this.openScreen("settings");
+        });
 
-      document.getElementById("btn-back-title-from-draw").addEventListener("click", () => {
-        this.openScreen("title");
-      });
+      document
+        .getElementById("btn-back-title-from-draw")
+        .addEventListener("click", () => {
+          this.openScreen("title");
+        });
 
-      document.getElementById("btn-start-game").addEventListener("click", () => {
-        this.startGame();
-      });
+      document
+        .getElementById("btn-start-game")
+        .addEventListener("click", () => {
+          this.startGame();
+        });
 
-      document.getElementById("btn-back-draw-from-ready").addEventListener("click", () => {
-        this.openScreen("draw");
-      });
+      document
+        .getElementById("btn-back-draw-from-ready")
+        .addEventListener("click", () => {
+          this.openScreen("draw");
+        });
 
       document.getElementById("btn-retry").addEventListener("click", () => {
         this.startGame();
       });
 
-      document.getElementById("btn-result-draw").addEventListener("click", () => {
-        this.openScreen("draw");
-      });
+      document
+        .getElementById("btn-result-draw")
+        .addEventListener("click", () => {
+          this.openScreen("draw");
+        });
 
-      document.getElementById("btn-result-title").addEventListener("click", () => {
-        this.openScreen("title");
-      });
+      document
+        .getElementById("btn-result-title")
+        .addEventListener("click", () => {
+          this.openScreen("title");
+        });
 
-      document.getElementById("btn-settings-back").addEventListener("click", () => {
-        this.openScreen("title");
-      });
+      document
+        .getElementById("btn-settings-back")
+        .addEventListener("click", () => {
+          this.openScreen("title");
+        });
 
-      document.getElementById("btn-clear-draw").addEventListener("click", () => DrawPad.clear(true));
-      document.getElementById("btn-undo-draw").addEventListener("click", () => DrawPad.undo());
+      document
+        .getElementById("btn-clear-draw")
+        .addEventListener("click", () => DrawPad.clear(true));
+      document
+        .getElementById("btn-undo-draw")
+        .addEventListener("click", () => DrawPad.undo());
 
       document.getElementById("btn-save-draw").addEventListener("click", () => {
         const png = DrawPad.exportNormalized96();
@@ -901,7 +1062,9 @@
 
       document.querySelectorAll(".size-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".size-btn").forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".size-btn")
+            .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           DrawPad.setBrushSize(btn.dataset.size);
         });
@@ -909,7 +1072,9 @@
 
       document.querySelectorAll(".color-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document.querySelectorAll(".color-btn").forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".color-btn")
+            .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           DrawPad.setColor(btn.dataset.color);
           document.getElementById("btn-eraser").textContent = "けしゴム OFF";
@@ -947,11 +1112,15 @@
     bindControls() {
       const bindHold = (id, key) => {
         const el = document.getElementById(id);
-        el.addEventListener("pointerdown", (e) => {
-          e.preventDefault();
-          AudioEngine.unlock();
-          Game.setInput(key, true);
-        }, { passive: false });
+        el.addEventListener(
+          "pointerdown",
+          (e) => {
+            e.preventDefault();
+            AudioEngine.unlock();
+            Game.setInput(key, true);
+          },
+          { passive: false },
+        );
         const off = (e) => {
           e.preventDefault();
           Game.setInput(key, false);
@@ -965,13 +1134,21 @@
       bindHold("ctrl-right", "right");
 
       const jump = document.getElementById("ctrl-jump");
-      jump.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        AudioEngine.unlock();
-        Game.queueJump();
-      }, { passive: false });
-      jump.addEventListener("pointerup", (e) => e.preventDefault(), { passive: false });
-      jump.addEventListener("pointercancel", (e) => e.preventDefault(), { passive: false });
+      jump.addEventListener(
+        "pointerdown",
+        (e) => {
+          e.preventDefault();
+          AudioEngine.unlock();
+          Game.queueJump();
+        },
+        { passive: false },
+      );
+      jump.addEventListener("pointerup", (e) => e.preventDefault(), {
+        passive: false,
+      });
+      jump.addEventListener("pointercancel", (e) => e.preventDefault(), {
+        passive: false,
+      });
     },
     applySettingsToForm() {
       this.els.setBgm.checked = this.settings.bgm;
@@ -994,7 +1171,9 @@
       const has = !!png;
       this.els.titlePreview.style.display = has ? "block" : "none";
       this.els.readyPreview.style.display = has ? "block" : "none";
-      this.els.titlePreviewLabel.textContent = has ? "このキャラであそべるよ" : "まだキャラがありません";
+      this.els.titlePreviewLabel.textContent = has
+        ? "このキャラであそべるよ"
+        : "まだキャラがありません";
       if (has) {
         this.els.titlePreview.src = png;
         this.els.readyPreview.src = png;
@@ -1043,7 +1222,9 @@
         s.style.top = `${rect.height * 0.5}px`;
         s.style.setProperty("--x", `${x}px`);
         s.style.setProperty("--y", `${y}px`);
-        s.style.background = ["#ffe066", "#ff9f1c", "#7bdff2", "#b2f7ef"][i % 4];
+        s.style.background = ["#ffe066", "#ff9f1c", "#7bdff2", "#b2f7ef"][
+          i % 4
+        ];
         card.appendChild(s);
         setTimeout(() => s.remove(), 760);
       }
@@ -1067,7 +1248,7 @@
         this.sparkles();
         AudioEngine.playSE("best");
       }
-    }
+    },
   };
 
   if (!CanvasRenderingContext2D.prototype.roundRect) {
